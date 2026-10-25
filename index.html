@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bíblia em um ano</title>
+<meta name="description" content="Acompanhe o plano de leitura da Bíblia em 365 dias, marque o que já leu e compartilhe notas com seu grupo.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#topo" aria-label="Bíblia em um ano, início">
+      <svg viewBox="0 0 20 24" aria-hidden="true"><path fill="currentColor" d="M8.4 0h3.2v8.2H20v3.2h-8.4V24H8.4V11.4H0V8.2h8.4z"/></svg>
+      Bíblia em um ano
+    </a>
+    <nav aria-label="Ações">
+      <button class="btn quiet" type="button" data-act="today">Hoje</button>
+      <button class="btn quiet" type="button" data-act="group">Grupo</button>
+      <button class="btn quiet" type="button" data-act="settings">Ajustes</button>
+      <button class="btn quiet" type="button" data-act="theme">Tema</button>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+  <section class="wrap hero" aria-labelledby="titulo">
+    <div class="hero-copy">
+      <h1 id="titulo">A Bíblia inteira, um dia de cada vez.</h1>
+      <p class="lede">São 365 dias percorrendo a história da salvação em 12 eras. Marque cada leitura, escreva suas notas e acompanhe o progresso junto com quem você quiser.</p>
+
+      <div id="cloudLine" hidden></div>
+      <section class="next" id="next" aria-live="polite" aria-label="Próxima leitura"></section>
+
+      <p id="status" style="color:var(--muted)"></p>
+      <p id="groupLine" hidden></p>
+      <div id="storageWarn" class="notice" hidden>Este navegador não permite salvar dados. Entre com o Google ou use o backup em Ajustes para não perder seu progresso.</div>
+    </div>
+
+    <div class="rose-wrap">
+      <svg class="rose" id="rose" viewBox="0 0 400 400" role="img" aria-label="Rosácea de progresso com 12 eras"></svg>
+      <dl class="facts" style="justify-content:center;margin-top:var(--space-4)" id="facts"></dl>
+    </div>
+  </section>
+
+  <section class="index" aria-label="Índice das eras">
+    <div class="wrap">
+      <nav class="chips" id="chips" aria-label="Ir para uma era"></nav>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Filtrar dias">
+        <button type="button" data-filter="all" aria-pressed="true">Todos</button>
+        <button type="button" data-filter="pending" aria-pressed="false">Pendentes</button>
+        <button type="button" data-filter="done" aria-pressed="false">Concluídos</button>
+      </div>
+      <p class="legend"><span class="dot" aria-hidden="true"></span> Ponto dourado: livro narrativo, que conduz a história principal</p>
+    </div>
+    <div id="days" data-filter="all"></div>
+    <p id="emptyMsg" class="notice" hidden>Nenhum dia neste filtro. Escolha outro filtro para ver o plano completo.</p>
+  </div>
+</main>
+
+<footer class="wrap site-foot">
+  <p>Plano de leitura baseado no cronograma oficial de 365 dias da Ascension para o podcast <i>Bíblia em um ano</i>, inspirado no <i>The Great Adventure Bible Timeline</i>, de Jeff Cavins. Os livros seguem a Bíblia católica.</p>
+</footer>
+
+<dialog id="groupDialog" aria-labelledby="groupTitle">
+  <h2 id="groupTitle">Grupo de leitura</h2>
+  <div id="groupBody"></div>
+  <section><div class="row"><button class="btn primary" type="button" data-close>Fechar</button></div></section>
+</dialog>
+
+<dialog id="notesDialog" aria-labelledby="notesTitle">
+  <h2 id="notesTitle">Notas</h2>
+  <p id="notesRef"></p>
+  <ul class="notas-lista" id="notesList"></ul>
+  <label for="noteField" class="sr-only">Escreva sua nota</label>
+  <textarea id="noteField" placeholder="O que esta passagem despertou em você? Dúvidas, versículos que marcaram, assuntos para conversar."></textarea>
+  <div class="row">
+    <button class="btn primary" type="button" data-act="noteSave" id="noteSaveBtn">Salvar nota</button>
+    <button class="btn" type="button" data-act="noteCancel" id="noteCancelBtn" hidden>Cancelar edição</button>
+    <button class="btn" type="button" data-close>Fechar</button>
+  </div>
+</dialog>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <h2 id="settingsTitle">Ajustes</h2>
+  <section>
+    <h3>Data de início</h3>
+    <p>Com a data, o plano mostra qual é o dia de hoje e se você está em dia.</p>
+    <input type="date" id="startDate" aria-label="Data de início do plano">
+    <div class="row"><button class="btn" type="button" data-act="clearStart">Remover data</button></div>
+  </section>
+  <section>
+    <h3>Backup do progresso</h3>
+    <p>Salve ou copie o texto abaixo. Para restaurar, cole o texto no campo e toque em Restaurar.</p>
+    <textarea id="backup" aria-label="Texto do backup" spellcheck="false"></textarea>
+    <div class="row">
+      <button class="btn" type="button" data-act="copy">Copiar</button>
+      <button class="btn" type="button" data-act="saveFile">Salvar arquivo</button>
+      <button class="btn" type="button" data-act="restore">Restaurar</button>
+    </div>
+    <p id="backupMsg" role="status"></p>
+  </section>
+  <section>
+    <h3>Recomeçar</h3>
+    <p>Apaga todas as marcações de leitura. Se você estiver logado, elas também somem da nuvem.</p>
+    <div class="row"><button class="btn" type="button" data-act="reset" id="resetBtn">Apagar progresso</button></div>
+  </section>
+  <section>
+    <div class="row"><button class="btn primary" type="button" data-close>Fechar</button></div>
+  </section>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function membro(grupoId) {
+      return logado() &&
+        request.auth.uid in get(/databases/$(database)/documents/grupos/$(grupoId)).data.membros;
+    }
+
+    // Guarda só em qual grupo a pessoa está
+    match /users/{uid} {
+      allow read, write: if logado() && request.auth.uid == uid;
+    }
+
+    match /grupos/{grupoId} {
+      // Quem tem o código consegue abrir o grupo para entrar. Ninguém consegue listar grupos.
+      allow get: if logado();
+      allow list, delete: if false;
+
+      allow create: if logado()
+        && request.resource.data.membros == [request.auth.uid]
+        && request.resource.data.criadoPor == request.auth.uid;
+
+      // A única alteração permitida é a própria pessoa entrar na lista de membros
+      allow update: if logado()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membros'])
+        && request.resource.data.membros.size() == resource.data.membros.size() + 1
+        && request.resource.data.membros.size() <= 10
+        && request.resource.data.membros.hasAll(resource.data.membros)
+        && request.auth.uid in request.resource.data.membros;
+
+      // Progresso: todos do grupo leem, cada um escreve só o seu
+      match /membros/{uid} {
+        allow read: if membro(grupoId);
+        allow write: if membro(grupoId) && request.auth.uid == uid;
+      }
+
+      // Notas: todos do grupo leem e criam, cada um edita e apaga só as suas
+      match /notas/{notaId} {
+        allow read: if membro(grupoId);
+        allow create: if membro(grupoId) && request.resource.data.autorId == request.auth.uid;
+        allow update, delete: if membro(grupoId) && resource.data.autorId == request.auth.uid;
+      }
+    }
+  }
+}
